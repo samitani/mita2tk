@@ -6,7 +6,7 @@ import getopt
 
 class GeneralLogFilter:
 
-    USAGE = 'USAGE: mita2-general-log-filter [--user user] [--no-mask] [--help]'
+    USAGE = 'USAGE: mita2-general-log-filter [--user user] [--no-mask] [--help] < general-log-file'
 
     def main(self):
         try:
