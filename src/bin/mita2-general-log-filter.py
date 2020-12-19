@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import re
 import sys
@@ -6,18 +6,18 @@ import getopt
 
 class GeneralLogFilter:
 
-    USAGE = 'USAGE: mita2-general-log-filter [--user user] [--no-mask] [--help]'
+    USAGE = 'USAGE: mita2-general-log-filter [--user user] [--no-mask] [--help] < general-log-file'
 
     def main(self):
         try:
             opts, args = getopt.getopt(sys.argv[1:], "", ["user=", "no-mask", "help"])
             opts = dict(opts)
         except getopt.GetoptError as err:
-            print self.USAGE
+            print(self.USAGE)
             sys.exit(1)
 
         if '--help' in opts.keys():
-            print self.USAGE
+            print(self.USAGE)
             sys.exit(0)
 
         session_user = {}
@@ -69,7 +69,7 @@ class GeneralLogFilter:
                 query = re.sub(r'"[^"]+"', "'S'", query)
                 query = re.sub(r'\b\d+\b', 'N', query)
 
-            print "%s\t%s\t%s" % (time, session_cmd, query)
+            print("%s\t%s\t%s" % (time, session_cmd, query))
 
 if __name__ == '__main__':
     log_filter = GeneralLogFilter()
