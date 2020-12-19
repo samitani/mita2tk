@@ -10,7 +10,7 @@ import string
 
 class BinlogMask:
     USAGE = '''\
-USAGE: mysqlbinlog -vv --base64-output=DECODE-ROWS binlog-file | mita2-general-log-filter.py [--preserve=schema.table.column_pos,schema.table.column_pos...]
+USAGE: mysqlbinlog -vv --base64-output=DECODE-ROWS binlog-file | mita2-binlog-mask.py [--preserve=schema.table.column_pos,schema.table.column_pos...]
 
 This script masks values in your decoded binary log.
 Binlog must be ROW formatted. Check your binlog_format is ROW.\
