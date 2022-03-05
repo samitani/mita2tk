@@ -19,13 +19,19 @@ Binlog must be ROW formatted. Check your binlog_format is ROW.\
     def rand_str(self, length):
         return ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
 
-    def shift_date(self, date, seconds_shift):
+    def shift_datetime(self, date, seconds_shift):
         fmt =  '%Y-%m-%d %H:%M:%S'
         shifted = datetime.datetime.strptime(date, fmt) + datetime.timedelta(seconds=seconds_shift)
 
         return shifted.strftime(fmt)
 
-    def mask_values(self, line):
+    def shift_date(self, date, seconds_shift):
+        fmt =  '%Y:%m:%d'
+        shifted = datetime.datetime.strptime(date, fmt) + datetime.timedelta(seconds=seconds_shift)
+
+        return shifted.strftime(fmt)
+
+    def mask_values(self, line, timeshift):
         valmatch = re.match(r'^(### +@([0-9]+)=)(.+?)( /\*.+)', line)
 
         column  = valmatch.group(1)
@@ -50,9 +56,6 @@ Binlog must be ROW formatted. Check your binlog_format is ROW.\
         elif re.match(r' /\* LONGINT .+', comment):
             masked = random.randint(0, 2**63 - 1) # SIGNED BIGINT
             return (column + str(masked) + comment)
-        elif re.match(r' /\* DATETIME\([0-9]+\) .+', comment):
-            masked = "'" + self.shift_date(value.replace("'", ""), timeshift) + "'"
-            return (column + masked + comment)
         elif re.match(r' /\* TINYBLOB/TINYTEXT .+', comment):
             masked = "'" + self.rand_str(len(value) - 2) + "'"
             return (column + masked + comment)
@@ -68,6 +71,15 @@ Binlog must be ROW formatted. Check your binlog_format is ROW.\
         elif re.match(r' /\* ENUM\(1 byte\) .+', comment):
             masked = random.randint(0, 2**8 - 1)
             return (column + str(masked) + comment)
+        elif re.match(r' /\* TIMESTAMP\([0-9]+\) .+', comment):
+            masked = random.randint(0, 2**32 - 1)
+            return (column + str(masked) + comment)
+        elif re.match(r' /\* DATETIME\([0-9]+\) .+', comment):
+            masked = "'" + self.shift_datetime(value.replace("'", ""), timeshift) + "'"
+            return (column + masked + comment)
+        elif re.match(r' /\* DATE .+', comment):
+            masked = "'" + self.shift_date(value.replace("'", ""), timeshift) + "'"
+            return (column + masked + comment)
         else:
             raise Exception('Unknown TYPE ' + line)
  
@@ -88,8 +100,8 @@ Binlog must be ROW formatted. Check your binlog_format is ROW.\
         if '--preserve' in opts.keys():
             preserve = opts['--preserve'].split(',')
 
-        # max 2 week
-        timeshift = random.randint(0, 60 * 60 * 24 * 14)
+        # max 356 days
+        timeshift = random.randint(0, 60 * 60 * 24 * 365)
 
         for line in sys.stdin.readlines():
             ### UPDATE `test`.`t`
@@ -117,7 +129,7 @@ Binlog must be ROW formatted. Check your binlog_format is ROW.\
                     print(line, end='')
                     continue
 
-                print(self.mask_values(line))
+                print(self.mask_values(line, timeshift))
             else:
                 print(line, end='')
 
