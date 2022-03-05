@@ -53,7 +53,16 @@ Binlog must be ROW formatted. Check your binlog_format is ROW.\
         elif re.match(r' /\* DATETIME\([0-9]+\) .+', comment):
             masked = "'" + self.shift_date(value.replace("'", ""), timeshift) + "'"
             return (column + masked + comment)
+        elif re.match(r' /\* TINYBLOB/TINYTEXT ', comment):
+            masked = "'" + self.rand_str(len(value) - 2) + "'"
+            return (column + masked + comment)
+        elif re.match(r' /\* MEDIUMBLOB/MEDIUMTEXT ', comment):
+            masked = "'" + self.rand_str(len(value) - 2) + "'"
+            return (column + masked + comment)
         elif re.match(r' /\* BLOB/TEXT ', comment):
+            masked = "'" + self.rand_str(len(value) - 2) + "'"
+            return (column + masked + comment)
+        elif re.match(r' /\* LONGBLOB/LONGTEXT ', comment):
             masked = "'" + self.rand_str(len(value) - 2) + "'"
             return (column + masked + comment)
         else:

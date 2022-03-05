@@ -32,3 +32,18 @@ class TestBinlogMask(TestCase):
 
         str5 = "###   @5=0 /* LONGINT meta=0 nullable=1 is_null=0 */"
         self.assertRegex(binlogmask.mask_values(str5), r'###   @5=[0-9]+ /\* LONGINT meta=0 nullable=1 is_null=0 \*/')
+
+    def test_mask_blobs(self):
+        binlogmask = binlogmaskmoj.BinlogMask()
+
+        str1 = "###   @1='a' /* TINYBLOB/TINYTEXT meta=1 nullable=1 is_null=0 */"
+        self.assertRegex(binlogmask.mask_values(str1), r"###   @1='[A-Z0-9]+' /\* TINYBLOB/TINYTEXT meta=1 nullable=1 is_null=0 \*/")
+
+        str2 = "###   @2='a' /* MEDIUMBLOB/MEDIUMTEXT meta=3 nullable=1 is_null=0 */"
+        self.assertRegex(binlogmask.mask_values(str2), r"###   @2='[A-Z0-9]+' /\* MEDIUMBLOB/MEDIUMTEXT meta=3 nullable=1 is_null=0 \*/")
+
+        str3 = "###   @3='a' /* BLOB/TEXT meta=2 nullable=1 is_null=0 */"
+        self.assertRegex(binlogmask.mask_values(str3), r"###   @3='[A-Z0-9]+' /\* BLOB/TEXT meta=2 nullable=1 is_null=0 \*/")
+
+        str4 = "###   @4='a' /* LONGBLOB/LONGTEXT meta=4 nullable=1 is_null=0 */"
+        self.assertRegex(binlogmask.mask_values(str4), r"###   @4='[A-Z0-9]+' /\* LONGBLOB/LONGTEXT meta=4 nullable=1 is_null=0 \*/")
