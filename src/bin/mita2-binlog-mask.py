@@ -25,6 +25,41 @@ Binlog must be ROW formatted. Check your binlog_format is ROW.\
 
         return shifted.strftime(fmt)
 
+    def mask_values(self, line):
+        valmatch = re.match(r'^(### +@([0-9]+)=)(.+?)( /\*.+)', line)
+
+        column  = valmatch.group(1)
+        value   = valmatch.group(3)
+        comment = valmatch.group(4)
+
+        if re.match(r' /\* VARSTRING\([0-9]+\) .+', comment):
+            masked = "'" + self.rand_str(len(value) - 2) + "'"
+            return (column + masked + comment)
+        elif re.match(r' /\* TINYINT .+', comment):
+            masked = random.randint(0, 2**8 - 1) # SIGNED TINYINT
+            return (column + str(masked) + comment)
+        elif re.match(r' /\* SHORTINT .+', comment):
+            masked = random.randint(0, 2**16 - 1) # SIGNED SHORTINT
+            return (column + str(masked) + comment)
+        elif re.match(r' /\* MEDIUMINT .+', comment):
+            masked = random.randint(0, 2**24 - 1) # SIGNED MEDIUMINT 
+            return (column + str(masked) + comment)
+        elif re.match(r' /\* INT .+', comment):
+            masked = random.randint(0, 2**32 - 1) # SIGNED INT
+            return (column + str(masked) + comment)
+        elif re.match(r' /\* LONGINT .+', comment):
+            masked = random.randint(0, 2**63 - 1) # SIGNED BIGINT
+            return (column + str(masked) + comment)
+        elif re.match(r' /\* DATETIME\([0-9]+\) .+', comment):
+            masked = "'" + self.shift_date(value.replace("'", ""), timeshift) + "'"
+            return (column + masked + comment)
+        elif re.match(r' /\* BLOB/TEXT ', comment):
+            masked = "'" + self.rand_str(len(value) - 2) + "'"
+            return (column + masked + comment)
+        else:
+            raise Exception('Unknown TYPE ' + line)
+ 
+
     def main(self):
         try:
             opts, args = getopt.getopt(sys.argv[1:], "", ["help", "preserve="])
@@ -64,32 +99,13 @@ Binlog must be ROW formatted. Check your binlog_format is ROW.\
                 table   = objmatch.group(3)
 
             if valmatch is not None:
-                column  = valmatch.group(1)
                 colpos  = valmatch.group(2)
-                value   = valmatch.group(3)
-                comment = valmatch.group(4)
                 
                 if schema + "." + table + "." + colpos in preserve:
                     print(line, end='')
                     continue
 
-                if re.match(r' /\* VARSTRING\([0-9]+\) .+', comment):
-                    masked = "'" + self.rand_str(len(value) - 2) + "'"
-                    print(column + masked + comment)
-                elif re.match(r' /\* LONGINT .+', comment):
-                    masked = random.randint(0, 2**63 - 1) # SIGNED BIGINT
-                    print(column + str(masked) + comment)
-                elif re.match(r' /\* INT .+', comment):
-                    masked = random.randint(0, 2**32 - 1) # SIGNED INT
-                    print(column + str(masked) + comment)
-                elif re.match(r' /\* DATETIME\([0-9]+\) .+', comment):
-                    masked = "'" + self.shift_date(value.replace("'", ""), timeshift) + "'"
-                    print(column + masked + comment)
-                elif re.match(r' /\* BLOB/TEXT ', comment):
-                    masked = "'" + self.rand_str(len(value) - 2) + "'"
-                    print(column + masked + comment)
-                else:
-                    raise Exception('Unknown TYPE ' + line)
+                print(self.mask_values(line))
             else:
                 print(line, end='')
 

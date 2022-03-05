@@ -14,3 +14,21 @@ class TestBinlogMask(TestCase):
         binlogmask = binlogmaskmoj.BinlogMask()
         shifted = binlogmask.shift_date('2020-12-10 10:00:00', 14 * 60 + 39)
         self.assertEqual("2020-12-10 10:14:39", shifted)
+
+    def test_mask_integers(self):
+        binlogmask = binlogmaskmoj.BinlogMask()
+
+        str1 = "###   @1=0 /* TINYINT meta=0 nullable=1 is_null=0 */"
+        self.assertRegex(binlogmask.mask_values(str1), r'###   @1=[0-9]+ /\* TINYINT meta=0 nullable=1 is_null=0 \*/')
+
+        str2 = "###   @2=0 /* SHORTINT meta=0 nullable=1 is_null=0 */"
+        self.assertRegex(binlogmask.mask_values(str2), r'###   @2=[0-9]+ /\* SHORTINT meta=0 nullable=1 is_null=0 \*/')
+
+        str3 = "###   @3=0 /* MEDIUMINT meta=0 nullable=1 is_null=0 */"
+        self.assertRegex(binlogmask.mask_values(str3), r'###   @3=[0-9]+ /\* MEDIUMINT meta=0 nullable=1 is_null=0 \*/')
+
+        str4 = "###   @4=0 /* INT meta=0 nullable=1 is_null=0 */"
+        self.assertRegex(binlogmask.mask_values(str4), r'###   @4=[0-9]+ /\* INT meta=0 nullable=1 is_null=0 \*/')
+
+        str5 = "###   @5=0 /* LONGINT meta=0 nullable=1 is_null=0 */"
+        self.assertRegex(binlogmask.mask_values(str5), r'###   @5=[0-9]+ /\* LONGINT meta=0 nullable=1 is_null=0 \*/')
