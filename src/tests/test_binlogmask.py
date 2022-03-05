@@ -47,3 +47,9 @@ class TestBinlogMask(TestCase):
 
         str4 = "###   @4='a' /* LONGBLOB/LONGTEXT meta=4 nullable=1 is_null=0 */"
         self.assertRegex(binlogmask.mask_values(str4), r"###   @4='[A-Z0-9]+' /\* LONGBLOB/LONGTEXT meta=4 nullable=1 is_null=0 \*/")
+
+    def test_enum(self):
+        binlogmask = binlogmaskmoj.BinlogMask()
+
+        str1 = "###   @1=1 /* ENUM(1 byte) meta=63233 nullable=1 is_null=0 */"
+        self.assertRegex(binlogmask.mask_values(str1), r"###   @1=[0-9]+ /\* ENUM\(1 byte\) meta=63233 nullable=1 is_null=0 \*/")
