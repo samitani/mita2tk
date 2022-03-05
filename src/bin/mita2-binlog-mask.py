@@ -41,6 +41,9 @@ Binlog must be ROW formatted. Check your binlog_format is ROW.\
         if re.match(r' /\* VARSTRING\([0-9]+\) .+', comment):
             masked = "'" + self.rand_str(len(value) - 2) + "'"
             return (column + masked + comment)
+        if re.match(r' /\* STRING\([0-9]+\) .+', comment):
+            masked = "'" + self.rand_str(len(value) - 2) + "'"
+            return (column + masked + comment)
         elif re.match(r' /\* TINYINT .+', comment):
             masked = random.randint(0, 2**8 - 1) # SIGNED TINYINT
             return (column + str(masked) + comment)

@@ -54,6 +54,15 @@ class TestBinlogMask(TestCase):
         str4 = "###   @4='a' /* LONGBLOB/LONGTEXT meta=4 nullable=1 is_null=0 */"
         self.assertRegex(binlogmask.mask_values(str4, 0), r"###   @4='[A-Z0-9]+' /\* LONGBLOB/LONGTEXT meta=4 nullable=1 is_null=0 \*/")
 
+    def test_mask_strings(self):
+        binlogmask = binlogmaskmoj.BinlogMask()
+
+        str1 = "###   @1='a' /* STRING(10) meta=65034 nullable=1 is_null=0 */"
+        self.assertRegex(binlogmask.mask_values(str1, 0), r"###   @1='[A-Z0-9]' /\* STRING\(10\) meta=65034 nullable=1 is_null=0 \*/")
+
+        str2 = "###   @2='b' /* VARSTRING(10) meta=10 nullable=1 is_null=0 */"
+        self.assertRegex(binlogmask.mask_values(str2, 0), r"###   @2='[A-Z0-9]' /\* VARSTRING\(10\) meta=10 nullable=1 is_null=0 \*/")
+
     def test_mask_enum(self):
         binlogmask = binlogmaskmoj.BinlogMask()
 
