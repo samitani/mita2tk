@@ -6,11 +6,11 @@ import getopt
 
 class GeneralLogFilter:
 
-    USAGE = 'USAGE: mita2-general-log-filter [--user user] [--no-mask] [--help] < general-log-file'
+    USAGE = 'USAGE: mita2-general-log-filter [--user user] [--command command] [--no-mask] [--help] < general-log-file'
 
     def main(self):
         try:
-            opts, args = getopt.getopt(sys.argv[1:], "", ["user=", "no-mask", "help"])
+            opts, args = getopt.getopt(sys.argv[1:], "", ["user=", "command=", "no-mask", "help"])
             opts = dict(opts)
         except getopt.GetoptError as err:
             print(self.USAGE)
@@ -24,6 +24,7 @@ class GeneralLogFilter:
         query = ''
         time = ''
         session_cmd = ''
+        cmd = ''
 
         for line in sys.stdin.readlines():
             line = line.strip()
@@ -35,6 +36,27 @@ class GeneralLogFilter:
             elif (re.match(r'Time\s+Id', line)):
                 continue
             elif (re.match(r'[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]+(\+[0-9]{2}:[0-9]{2}|Z)', line)):
+                if query != "":
+                    output = True
+
+                    if '--user' in opts.keys() and not session_user[session_id] == opts['--user']:
+                        output = False
+
+                    if '--command' in opts.keys() and cmd != opts['--command']:
+                        output = False
+
+                    if not '--no-mask' in opts.keys():
+                        query = re.sub(r"'[^']+'", "'S'", query)
+                        query = re.sub(r'"[^"]+"', "'S'", query)
+                        query = re.sub(r'\b\d+\b', 'N', query)
+
+                    if output:
+                        print("%s\t%s\t%s" % (time, session_cmd, query))
+
+                query = ''
+                cmd = ''
+                session_cmd = ''
+
                 parts = line.split("\t")
                 if len(parts) == 2:
                     time = parts[0]
@@ -57,19 +79,6 @@ class GeneralLogFilter:
             else:
                 query = query + ' ' + line
 
-            if '--user' in opts.keys():
-                if not session_id in session_user:
-                    continue
-
-                if not session_user[session_id] == opts['--user']:
-                    continue
-
-            if not '--no-mask' in opts.keys():
-                query = re.sub(r"'[^']+'", "'S'", query)
-                query = re.sub(r'"[^"]+"', "'S'", query)
-                query = re.sub(r'\b\d+\b', 'N', query)
-
-            print("%s\t%s\t%s" % (time, session_cmd, query))
 
 if __name__ == '__main__':
     log_filter = GeneralLogFilter()

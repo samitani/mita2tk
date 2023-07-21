@@ -6,7 +6,7 @@ Mita2 Tookit is a collection of Mitani-san personal command-line tools for MySQL
 
 ```
 $ mita2-general-log-filter.py --help
-USAGE: mita2-general-log-filter [--user user] [--no-mask] [--help]
+USAGE: mita2-general-log-filter [--user user] [--no-mask] [--command Command] [--help]
 ```
 
 Filtering general log query executed by root user.
