@@ -81,3 +81,31 @@ DELIMITER ;
 /*!50003 SET COMPLETION_TYPE=@OLD_COMPLETION_TYPE*/;
 /*!50530 SET @@SESSION.PSEUDO_SLAVE_MODE=0*/;
 ```
+
+## mita2-repl-lag-watcher
+
+```
+$ mita2-repl-lag-watcher.py --help
+USAGE: mita2-repl-lag-watcher [--source-host host] [--source-port port] [--replica-host host] [--replica-port port] [--database database] [--user user] [--password password] [--help]
+```
+
+```
+$ mita2-repl-lag-watcher.py --source-host 127.0.0.1 --source-port 3800 --replica-host 127.0.0.1 --replica-port 3801  --user repl --password Password@123
+--------------------------------------------------
+Starting continuous lag check (UPDATE interval: 1s)
+Press Ctrl-C to stop.
+--------------------------------------------------
+Last Update: 2025-10-30 16:09:51.804082, Local Time: 2025-10-30 16:09:51.818926, Replication Lag: **14.844 ms**
+Last Update: 2025-10-30 16:09:51.813786, Local Time: 2025-10-30 16:09:51.824243, Replication Lag: **10.457 ms**
+Last Update: 2025-10-30 16:09:52.818861, Local Time: 2025-10-30 16:09:52.832683, Replication Lag: **13.822 ms**
+Last Update: 2025-10-30 16:09:53.827853, Local Time: 2025-10-30 16:09:53.844411, Replication Lag: **16.558 ms**
+```
+
+## Compatibility
+
+|                             | MySQL 5.7 | MySQL 8.0   | MySQL 8.4   |
+| --------------------------- | --------- | ----------- | ----------- |
+| mita2-binlog-mask.py        | OK        | Unconfirmed | Unconfirmed |
+| mita2-general-log-filter.py | OK        | Unconfirmed | Unconfirmed |
+| mita2-repl-lag-watcher.py   | OK        | OK          | Unconfirmed |
+
