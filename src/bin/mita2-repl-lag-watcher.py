@@ -117,6 +117,9 @@ class ReplLagWatcher:
             print(e)
             sys.exit(1)
 
+        # wait for creating the table
+        time.sleep(1)
+
         # launch monitor process
         replica_watcher = mp.Process(
             target=self._continuous_replica_checker,
@@ -134,6 +137,10 @@ class ReplLagWatcher:
                 while True:
                     update_query = f"UPDATE {TABLE_NAME} SET updated = NOW(6) WHERE id = 1"
                     cursor.execute(update_query)
+
+                    if not replica_watcher.is_alive():
+                        break
+
                     time.sleep(UPDATE_INTERVAL)
         except KeyboardInterrupt:
             replica_watcher.terminate()
