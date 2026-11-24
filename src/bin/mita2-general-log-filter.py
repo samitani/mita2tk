@@ -39,7 +39,7 @@ class GeneralLogFilter:
                 if query != "":
                     output = True
 
-                    if '--user' in opts.keys() and not session_user[session_id] == opts['--user']:
+                    if '--user' in opts.keys() and (session_id not in session_user or not session_user[session_id] == opts['--user']):
                         output = False
 
                     if '--command' in opts.keys() and cmd != opts['--command']:
@@ -67,11 +67,16 @@ class GeneralLogFilter:
                 else:
                     raise Exception('Unkown format %s' % line)
 
-                match = re.match(r' *([0-9]+) (\w+)', session_cmd)
+                match = re.match(r' *([0-9]+) (.+)$', session_cmd)
                 session_id = match.group(1)
                 cmd = match.group(2)
 
                 if cmd == 'Connect' and not re.match(r'Access denied for user', query):
+                    match = re.match(r'([^@]+)@[^@]+ on .+', query)
+                    user = match.group(1)
+                    session_user[session_id] = user
+
+                if cmd == 'Change user':
                     match = re.match(r'([^@]+)@[^@]+ on .+', query)
                     user = match.group(1)
                     session_user[session_id] = user
